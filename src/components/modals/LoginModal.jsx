@@ -113,11 +113,20 @@ const LoginModal = ({ isOpen, onClose }) => {
       <div className="p-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+          {/* <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
             <LockKeyhole className="w-8 h-8 text-blue-600" />
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900">Admin Login</h2>
-          <p className="text-gray-600 mt-2">Enter your credentials to access the dashboard</p>
+          </div> */}
+                    <div className="text-center mb-8">
+           <div className="flex justify-center mb-4">
+             <img 
+               src="/pbLogoTransparent.webp" 
+               alt="PB Group Logo" 
+               className="h-12 w-auto object-contain"
+             />
+           </div>
+           <h2 className="text-3xl font-bold text-gray-900">Admin Login</h2>
+           <p className="text-gray-600 mt-2">Enter your credentials to access the dashboard</p>
+         </div>
         </div>
 
         {/* Form */}
@@ -217,6 +226,3 @@ const LoginModal = ({ isOpen, onClose }) => {
 };
 
 export default LoginModal;
-
-
-
