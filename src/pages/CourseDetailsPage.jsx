@@ -23,7 +23,7 @@ import {
   getSimilarCourses,
   getSyllabusByCourseSlug,
 } from "../data/courseDetails";
-import Modal from "../components/Modal";
+import Modal from "../components/modals/Modal";
 import SeoHelmet from "../components/seo/SeoHelmet";
 
 // Custom hook for scroll animations (same as ServiceDetailPage)

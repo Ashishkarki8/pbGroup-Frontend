@@ -1,5 +1,6 @@
 // ========================================
-// APP COMPONENT WITH HIDDEN LOGIN ROUTE
+// APP COMPONENT - UPDATED
+// Login now shows as modal on Home page
 // ========================================
 
 import { Suspense, lazy } from "react";
@@ -27,7 +28,6 @@ const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 // ========================================
 // ADMIN PAGES (Lazy loaded)
 // ========================================
-const Login = lazy(() => import("./pages/admin-pages/Login"));
 const AdminDashboard = lazy(() => import("./pages/admin-pages/AdminDashboard"));
 const AdminList = lazy(() => import("./pages/admin-pages/AdminList"));
 const AdminProfile = lazy(() => import("./pages/admin-pages/AdminProfile"));
@@ -73,14 +73,15 @@ function App() {
             <Route path="courses/:slug" element={<CourseDetailsPage />} />
             <Route path="blogs/:slug" element={<BlogDetailsPage />} />
             <Route path="services/:slug" element={<ServiceDetailPage />} />
+
+            {/* ========================================
+                ✅ LOGIN ROUTE - Shows Home with Login Modal
+                When user visits /auth/x7k9p2m/login,
+                it loads Home page with login modal on top!
+                ======================================== */}
+            <Route path={ROUTES.LOGIN} element={<Home />} />
           </Route>
 
-          {/* ========================================
-              ✅ HIDDEN LOGIN ROUTE (No Layout)
-              Uses: /auth/x7k9p2m/login
-              ======================================== */}
-          <Route path={ROUTES.LOGIN} element={<Login />} />
-          
           {/* Unauthorized page */}
           <Route path="/unauthorized" element={<Unauthorized />} />
 

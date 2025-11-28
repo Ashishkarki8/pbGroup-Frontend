@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import Modal from "./Modal"; // Import your Modal component
+import Modal from "./modals/Modal"; // Import your Modal component
 
 const TestimonialsSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);

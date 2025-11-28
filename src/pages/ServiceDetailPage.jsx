@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import Modal from "../components/Modal.jsx";
+import Modal from "../components/modals/Modal.jsx";
 import SeoHelmet from "../components/seo/SeoHelmet.jsx";
 import { services } from "../data/services.js";
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Clock, Star, Users, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import Modal from "./Modal";
+import Modal from "./modals/Modal";
 
 const CoursesSection = () => {
   const [activeCategory, setActiveCategory] = useState("All");
