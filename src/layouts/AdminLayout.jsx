@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { Home, User, Users, LogOut } from 'lucide-react';
+import { Home, User, Users, LogOut, Image } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import useAuth from '../hooks/useAuth';
 import { ROUTES } from '../utils/constants';
@@ -17,6 +17,7 @@ export default function AdminLayout() {
   const navItems = [
     { to: ROUTES.ADMIN_DASHBOARD, label: 'Dashboard', icon: Home },
     { to: ROUTES.ADMIN_PROFILE, label: 'Profile', icon: User },
+    { to: ROUTES.ADMIN_POSTERS, label: 'Posters', icon: Image },
   ];
 
   if (canManageAdmins) {

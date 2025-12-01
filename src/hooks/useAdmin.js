@@ -193,9 +193,10 @@
 // Handles all admin management operations with React Query
 // ========================================
 
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import adminService from '../api/services/admin.service';
+import posterService from '../api/services/poster.service';
 import {
   queryKeys,
   invalidateAdminList,
@@ -329,6 +330,90 @@ export const useDeleteAdmin = () => {
 };
 
 // ========================================
+// HOOK: usePosterList
+// Get paginated poster list with filters
+// ========================================
+export const usePosterList = (filters = {}) => {
+  return useQuery({
+    queryKey: ['poster-list', filters],
+    queryFn: () => posterService.getAll(filters),
+    staleTime: 3 * 60 * 1000,
+    keepPreviousData: true,
+  });
+};
+
+// ========================================
+// HOOK: usePosterDetail
+// Get single poster by ID
+// ========================================
+export const usePosterDetail = (id) => {
+  return useQuery({
+    queryKey: ['poster-detail', id],
+    queryFn: () => posterService.getById(id),
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
+// ========================================
+// HOOK: useCreatePoster
+// Create new poster
+// ========================================
+export const useCreatePoster = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: posterService.create,
+    onSuccess: () => {
+      toast.success('Poster created successfully');
+      queryClient.invalidateQueries({ queryKey: ['poster-list'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to create poster');
+    },
+  });
+};
+
+// ========================================
+// HOOK: useUpdatePoster
+// Update poster
+// ========================================
+export const useUpdatePoster = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, formData }) => posterService.update(id, formData),
+    onSuccess: (_, variables) => {
+      toast.success('Poster updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['poster-list'] });
+      queryClient.invalidateQueries({ queryKey: ['poster-detail', variables.id] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to update poster');
+    },
+  });
+};
+
+// ========================================
+// HOOK: useDeletePoster
+// Delete poster
+// ========================================
+export const useDeletePoster = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: posterService.delete,
+    onSuccess: () => {
+      toast.success('Poster deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['poster-list'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to delete poster');
+    },
+  });
+};
+
+// ========================================
 // COMBINED HOOK: useAdminManagement
 // ========================================
 export const useAdminManagement = () => {
@@ -359,4 +444,27 @@ export const useAdminManagement = () => {
   };
 };
 
-export default useAdminManagement; 
+// ========================================
+// COMBINED HOOK: usePosterManagement
+// ========================================
+export const usePosterManagement = () => {
+  const createPoster = useCreatePoster();
+  const updatePoster = useUpdatePoster();
+  const deletePoster = useDeletePoster();
+
+  return {
+    createPoster: createPoster.mutate,
+    updatePoster: updatePoster.mutate,
+    deletePoster: deletePoster.mutate,
+
+    isCreating: createPoster.isPending,
+    isUpdating: updatePoster.isPending,
+    isDeleting: deletePoster.isPending,
+
+    createPosterMutation: createPoster,
+    updatePosterMutation: updatePoster,
+    deletePosterMutation: deletePoster,
+  };
+};
+
+export default useAdminManagement;

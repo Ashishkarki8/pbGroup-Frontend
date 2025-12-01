@@ -57,6 +57,9 @@ export const ROUTES = {
   ADMIN_LIST: '/admin/users',
   ADMIN_CREATE: '/admin/users/create',
   ADMIN_STATS: '/admin/stats',
+
+  // Poster Management
+  ADMIN_POSTERS: '/admin/posters',
   
   // Error Pages
   NOT_FOUND: '/404',
@@ -75,6 +78,11 @@ export const API_KEYS = {
   ADMIN_LIST: 'admin-list',
   ADMIN_DETAIL: 'admin-detail',
   ADMIN_STATS: 'admin-stats',
+
+  // Poster Management
+  POSTER_LIST: 'poster-list',
+  POSTER_DETAIL: 'poster-detail',
+  POSTER_ACTIVE: 'poster-active',
 };
 
 // ========================================

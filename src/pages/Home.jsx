@@ -1,16 +1,17 @@
 // import { ChevronLeft, ChevronRight, X } from "lucide-react";
 // import { useEffect, useState, useRef } from "react";
-// import { Link } from "react-router-dom";
+// import { Link, useLocation, useNavigate } from "react-router-dom";
 // import AboutSection from "../components/AboutSection";
 // import OurClients from "../components/ClientsSection";
 // import CoursesSection from "../components/CourseSection";
 // import OurServices from "../components/OurServices";
-
-// import LoginModal from "../components/modals/LoginModal"; // NEW IMPORT
+// import LoginModal from "../components/modals/LoginModal";
 // import SeoHelmet from "../components/seo/SeoHelmet";
 // import Testimonials from "../components/Testimonials";
 // import Modal from "../components/modals/Modal";
-// import PosterModal from "../components/modals/PosterModel";
+// import { ROUTES } from "../utils/constants";
+// import useAuthStore from "../store/authStore";
+// import PosterModal from "../components/modals/PosterModal";
 
 // // Simple counting animation hook
 // const useCountUp = (end, duration = 2000, enabled = true) => {
@@ -60,42 +61,74 @@
 // };
 
 // const Home = () => {
-//   const [isPosterOpen, setIsPosterOpen] = useState(false);
+//   const location = useLocation();
+//   const navigate = useNavigate();
+//   const { isAuthenticated } = useAuthStore();
+
+//   // Check sessionStorage before initial render
+//   const shouldShowPoster = () => {
+//     try {
+//       return !sessionStorage.getItem("pb-group-welcome-poster-shown");
+//     } catch {
+//       return false;
+//     }
+//   };
+
+//   // Initialize state immediately
+//   const [isPosterOpen, setIsPosterOpen] = useState(shouldShowPoster());
+//   const [isLoginOpen, setIsLoginOpen] = useState(false);
 //   const [currentSlide, setCurrentSlide] = useState(0);
 //   const [imagesLoaded, setImagesLoaded] = useState({});
 //   const [isModalOpen, setIsModalOpen] = useState(false);
 //   const [bannerVisible, setBannerVisible] = useState(false);
 //   const [animationsEnabled, setAnimationsEnabled] = useState(false);
 
-//   // Animated stats counters with refs (only start when enabled)
+//   // Animated stats counters with refs
 //   const [count1, ref1] = useCountUp(50, 2000, animationsEnabled);
 //   const [count2, ref2] = useCountUp(500, 2000, animationsEnabled);
 //   const [count3, ref3] = useCountUp(120, 2000, animationsEnabled);
 
-//   // Poster and animation timing
+//   // Login route detection
 //   useEffect(() => {
-//     const posterShown = sessionStorage.getItem("dashain-poster-shown");
+//     const isLoginRoute = location.pathname === ROUTES.LOGIN;
     
-//     if (!posterShown) {
-//       // Show poster immediately for new users
-//       setIsPosterOpen(true);
-//     } else {
-//       // Start animations immediately for returning users
+//     if (isLoginRoute) {
+//       if (isAuthenticated) {
+//         navigate(ROUTES.ADMIN_DASHBOARD);
+//       } else {
+//         setIsLoginOpen(true);
+//         setIsPosterOpen(false);
+//       }
+//     }
+//   }, [location.pathname, isAuthenticated, navigate]);
+
+//   // Enable animations when poster closes or isn't shown
+//   useEffect(() => {
+//     if (!isPosterOpen) {
 //       setAnimationsEnabled(true);
 //       const timer = setTimeout(() => setBannerVisible(true), 100);
 //       return () => clearTimeout(timer);
 //     }
-//   }, []);
+//   }, [isPosterOpen]);
 
 //   const handleClosePoster = () => {
 //     setIsPosterOpen(false);
-//     sessionStorage.setItem("dashain-poster-shown", "true");
+//     try {
+//       sessionStorage.setItem("pb-group-welcome-poster-shown", "true");
+//     } catch (error) {
+//       console.warn("SessionStorage not available:", error);
+//     }
     
-//     // Start animations after poster closes
 //     setAnimationsEnabled(true);
 //     setTimeout(() => setBannerVisible(true), 200);
 //   };
 
+//   const handleCloseLogin = () => {
+//     setIsLoginOpen(false);
+//     if (location.pathname === ROUTES.LOGIN) {
+//       navigate("/");
+//     }
+//   };
 
 //   const slides = [
 //     {
@@ -151,12 +184,10 @@
 //       img.src = src;
 //     };
 
-//     // Preload first 3 images immediately
 //     slides.slice(0, 3).forEach((slide, index) => {
 //       preloadImage(slide.src, index);
 //     });
 
-//     // Preload remaining images after delay
 //     const timer = setTimeout(() => {
 //       slides.slice(3).forEach((slide, index) => {
 //         preloadImage(slide.src, index + 3);
@@ -175,13 +206,13 @@
 //     return () => clearInterval(autoSlide);
 //   }, [slides.length]);
 
-//   // Simple slide navigation
+//   // Slide navigation
 //   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
 //   const prevSlide = () =>
 //     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 //   const goToSlide = (index) => setCurrentSlide(index);
 
-//   // Touch handling for mobile swipes
+//   // Touch handling
 //   const [touchStart, setTouchStart] = useState(null);
 //   const [touchEnd, setTouchEnd] = useState(null);
 
@@ -220,25 +251,27 @@
 //         url="https://pbg.com.np/"
 //       />
 
-//       {/* Preload critical images */}
+//       {/* Preload poster image first with highest priority */}
+//       <link rel="preload" as="image" href="/poster/Banner.webp" fetchpriority="high" />
+      
+//       {/* Preload other critical images */}
 //       <link rel="preload" as="image" href={slides[0].src} />
 //       <link rel="preload" as="image" href={slides[1].src} />
 
-//       {/* 
-//         OPTION A: Poster with external link (e.g., Google Form)
-//         Use this if your poster should open a Google Form
-//       */}
+//       {/* Poster modal - loads instantly on first visit */}
 //       <PosterModal
 //         isOpen={isPosterOpen}
 //         onClose={handleClosePoster}
 //         posterImage="/poster/Banner.webp"
-//         posterAlt="Offer Banner"
+//         posterAlt="PB Group Welcome Banner"
 //         posterLink="https://docs.google.com/forms/d/e/1FAIpQLSeDX0dtxDzX-k2FGwV1RCgxT1Qecmm4a4jKbJfI_EPYkTbfaA/viewform?embedded=true"
 //       />
 
-//       {/* 
-      
-
+//       {/* Login modal */}
+//       <LoginModal
+//         isOpen={isLoginOpen}
+//         onClose={handleCloseLogin}
+//       />
 
 //       {/* Hero Section */}
 //       <main id="home" className="relative overflow-hidden scroll-mt-20">
@@ -403,7 +436,7 @@
 //         </div>
 //       </main>
 
-//       {/* Sections with proper IDs for smooth scrolling */}
+//       {/* Sections with proper IDs */}
 //       <section id="about" className="scroll-mt-20">
 //         <AboutSection />
 //       </section>
@@ -431,12 +464,6 @@
 
 
 
-
-
-// ========================================
-// HOME PAGE - UPDATED WITH LOGIN MODAL
-// ========================================
-
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -444,13 +471,14 @@ import AboutSection from "../components/AboutSection";
 import OurClients from "../components/ClientsSection";
 import CoursesSection from "../components/CourseSection";
 import OurServices from "../components/OurServices";
-import PosterModal from "../components/modals/PosterModel";
-import LoginModal from "../components/modals/LoginModal"; // ✅ NEW IMPORT
+import LoginModal from "../components/modals/LoginModal";
 import SeoHelmet from "../components/seo/SeoHelmet";
 import Testimonials from "../components/Testimonials";
 import Modal from "../components/modals/Modal";
 import { ROUTES } from "../utils/constants";
-import useAuthStore from "../store/authStore"; // ✅ NEW IMPORT
+import useAuthStore from "../store/authStore";
+import PosterModal from "../components/modals/PosterModal";
+import { useActivePoster } from "../hooks/usePoster";
 
 // Simple counting animation hook
 const useCountUp = (end, duration = 2000, enabled = true) => {
@@ -500,77 +528,91 @@ const useCountUp = (end, duration = 2000, enabled = true) => {
 };
 
 const Home = () => {
-  // ========================================
-  // ✅ NEW: Router hooks for login detection
-  // ========================================
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
 
-  // Existing state
+  // Fetch active poster from API
+  const { data: activePoster, isLoading: posterLoading } = useActivePoster();
+
+  // Check sessionStorage before initial render
+  const shouldShowPoster = () => {
+    try {
+      const hasShown = sessionStorage.getItem("pb-group-welcome-poster-shown");
+      return !hasShown && activePoster; // Only show if poster exists and not shown
+    } catch {
+      return false;
+    }
+  };
+
+  // Initialize state
   const [isPosterOpen, setIsPosterOpen] = useState(false);
-  const [isLoginOpen, setIsLoginOpen] = useState(false); // ✅ NEW STATE
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [imagesLoaded, setImagesLoaded] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bannerVisible, setBannerVisible] = useState(false);
   const [animationsEnabled, setAnimationsEnabled] = useState(false);
 
-  // Animated stats counters with refs (only start when enabled)
+  // Animated stats counters with refs
   const [count1, ref1] = useCountUp(50, 2000, animationsEnabled);
   const [count2, ref2] = useCountUp(500, 2000, animationsEnabled);
   const [count3, ref3] = useCountUp(120, 2000, animationsEnabled);
 
-  // ========================================
-  // ✅ NEW: Detect login URL and show modal
-  // ========================================
+  // Update poster state when data loads
+  useEffect(() => {
+    if (!posterLoading && activePoster) {
+      const hasShown = sessionStorage.getItem("pb-group-welcome-poster-shown");
+      if (!hasShown) {
+        setIsPosterOpen(true);
+      } else {
+        setAnimationsEnabled(true);
+        setBannerVisible(true);
+      }
+    } else if (!posterLoading && !activePoster) {
+      // No active poster, enable animations immediately
+      setAnimationsEnabled(true);
+      setBannerVisible(true);
+    }
+  }, [posterLoading, activePoster]);
+
+  // Login route detection
   useEffect(() => {
     const isLoginRoute = location.pathname === ROUTES.LOGIN;
     
     if (isLoginRoute) {
       if (isAuthenticated) {
-        // Already logged in, redirect to dashboard
         navigate(ROUTES.ADMIN_DASHBOARD);
       } else {
-        // Show login modal on home page
         setIsLoginOpen(true);
-        setIsPosterOpen(false); // Don't show poster if login is showing
+        setIsPosterOpen(false);
       }
     }
   }, [location.pathname, isAuthenticated, navigate]);
 
-  // ========================================
-  // Poster and animation timing (UPDATED)
-  // ========================================
+  // Enable animations when poster closes or isn't shown
   useEffect(() => {
-    const posterShown = sessionStorage.getItem("dashain-poster-shown");
-    const isLoginRoute = location.pathname === ROUTES.LOGIN;
-    
-    // Only show poster if NOT on login route
-    if (!posterShown && !isLoginRoute) {
-      setIsPosterOpen(true);
-    } else {
+    if (!isPosterOpen) {
       setAnimationsEnabled(true);
       const timer = setTimeout(() => setBannerVisible(true), 100);
       return () => clearTimeout(timer);
     }
-  }, [location.pathname]);
+  }, [isPosterOpen]);
 
   const handleClosePoster = () => {
     setIsPosterOpen(false);
-    sessionStorage.setItem("dashain-poster-shown", "true");
+    try {
+      sessionStorage.setItem("pb-group-welcome-poster-shown", "true");
+    } catch (error) {
+      console.warn("SessionStorage not available:", error);
+    }
     
-    // Start animations after poster closes
     setAnimationsEnabled(true);
     setTimeout(() => setBannerVisible(true), 200);
   };
 
-  // ========================================
-  // ✅ NEW: Handle login modal close
-  // ========================================
   const handleCloseLogin = () => {
     setIsLoginOpen(false);
-    // Navigate back to home (removes login URL)
     if (location.pathname === ROUTES.LOGIN) {
       navigate("/");
     }
@@ -630,12 +672,10 @@ const Home = () => {
       img.src = src;
     };
 
-    // Preload first 3 images immediately
     slides.slice(0, 3).forEach((slide, index) => {
       preloadImage(slide.src, index);
     });
 
-    // Preload remaining images after delay
     const timer = setTimeout(() => {
       slides.slice(3).forEach((slide, index) => {
         preloadImage(slide.src, index + 3);
@@ -654,13 +694,13 @@ const Home = () => {
     return () => clearInterval(autoSlide);
   }, [slides.length]);
 
-  // Simple slide navigation
+  // Slide navigation
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
   const prevSlide = () =>
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   const goToSlide = (index) => setCurrentSlide(index);
 
-  // Touch handling for mobile swipes
+  // Touch handling
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
 
@@ -699,25 +739,27 @@ const Home = () => {
         url="https://pbg.com.np/"
       />
 
-      {/* Preload critical images */}
+      {/* Preload poster image if available */}
+      {activePoster?.imageUrl && (
+        <link rel="preload" as="image" href={activePoster.imageUrl} fetchpriority="high" />
+      )}
+      
+      {/* Preload other critical images */}
       <link rel="preload" as="image" href={slides[0].src} />
       <link rel="preload" as="image" href={slides[1].src} />
 
-      {/* ========================================
-          POSTER MODAL (Existing)
-          ======================================== */}
-      <PosterModal
-        isOpen={isPosterOpen}
-        onClose={handleClosePoster}
-        posterImage="/poster/Banner.webp"
-        posterAlt="Offer Banner"
-        posterLink="https://docs.google.com/forms/d/e/1FAIpQLSeDX0dtxDzX-k2FGwV1RCgxT1Qecmm4a4jKbJfI_EPYkTbfaA/viewform?embedded=true"
-      />
+      {/* Dynamic Poster modal - loads from Cloudinary */}
+      {activePoster && (
+        <PosterModal
+          isOpen={isPosterOpen}
+          onClose={handleClosePoster}
+          posterImage={activePoster.imageUrl}
+          posterAlt={activePoster.altText || "Special Offer"}
+          posterLink={activePoster.link || "#"}
+        />
+      )}
 
-      {/* ========================================
-          ✅ LOGIN MODAL (NEW!)
-          Shows when user visits /auth/x7k9p2m/login
-          ======================================== */}
+      {/* Login modal */}
       <LoginModal
         isOpen={isLoginOpen}
         onClose={handleCloseLogin}
@@ -886,7 +928,7 @@ const Home = () => {
         </div>
       </main>
 
-      {/* Sections with proper IDs for smooth scrolling */}
+      {/* Sections with proper IDs */}
       <section id="about" className="scroll-mt-20">
         <AboutSection />
       </section>
