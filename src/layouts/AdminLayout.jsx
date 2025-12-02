@@ -17,7 +17,7 @@ export default function AdminLayout() {
   const navItems = [
     { to: ROUTES.ADMIN_DASHBOARD, label: 'Dashboard', icon: Home },
     { to: ROUTES.ADMIN_PROFILE, label: 'Profile', icon: User },
-    { to: ROUTES.ADMIN_POSTERS, label: 'Posters', icon: Image },
+    // { to: ROUTES.ADMIN_POSTERS, label: 'Posters', icon: Image },
   ];
 
   if (canManageAdmins) {
